@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Кабинеты</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Кабинеты</h1>
+  <a href="/cabinet/add">Добавить кабинет</a>
+
+  <div>
+    {% for cab in cabinets %}
+      <a href="/cabinet/{{ cab.id }}" style="display:block; margin:10px 0; padding:20px; background:#e8e8f0; text-decoration:none; color:#000;">
+        <strong>{{ cab.name }}</strong>
+      </a>
+    {% endfor %}
+  </div>
+</body>
+</html>

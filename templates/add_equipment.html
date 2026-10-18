@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>Добавить технику</title> <link rel="stylesheet" href="/static/style.css"></head>
+<body>
+  <h1>Добавить оборудование</h1>
+  <form action="/equipment" method="POST">
+    <input type="hidden" name="cabinets_id" value="{{ cabinet_id }}">
+    <input name="name" placeholder="Название" required><br>
+    <input name="type" placeholder="Тип" required><br>
+    <input name="inv_number" placeholder="Инв. номер" required><br>
+    <select name="status" required>
+      <option value="Исправно">Исправно</option>
+      <option value="В ремонте">В ремонте</option>
+      <option value="Списано">Списано</option>
+    </select><br>
+    <button type="submit">Сохранить</button>
+  </form>
+  <a href="/cabinet/{{ cabinet_id }}">Назад</a>
+</body>
+</html>

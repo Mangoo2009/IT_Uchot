@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>Кабинет</title> <link rel="stylesheet" href="/static/style.css"> </head>
+<body>
+  <h1>{{ cabinet.name }}</h1>
+  <a href="/equipment/add?cabinet_id={{ cabinet.id }}">Добавить оборудование</a>
+
+  <table border="1">
+    <tr>
+      <th>Название</th>
+      <th>Тип</th>
+      <th>Номер</th>
+      <th>Статус</th>
+    </tr>
+    {% for item in equipment %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.type }}</td>
+      <td>{{ item.inv_number }}</td>
+      <td>{{ item.status }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <a href="/">Назад</a>
+</body>
+</html>
