@@ -76,6 +76,8 @@ static/        CSS-файлы
 
 Тестовый логин `Mango123`, пароль `admin`
 
+
+![кот](C:\Users\Sergey\PycharmProjects\myProject/NO.jpg)
 ## Еще будет в проекте:
 
 - редактирование и удаление кабинетов и оборудования
