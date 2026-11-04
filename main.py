@@ -198,6 +198,12 @@ def delete_equipment(request: Request, equipment_id: int,
         session.commit()
     return RedirectResponse(url=f'/cabinet/{cabinets_id}', status_code=303)
 
+@app.post('/logout')
+def logout():
+    response = RedirectResponse(url='/login', status_code=303)
+    SuperMango.unset_access_cookies(response)
+    return response
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=8000)
