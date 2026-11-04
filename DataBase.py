@@ -35,7 +35,7 @@ class Equpment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str]
     status: Mapped[str]
-    cabinets_id: Mapped[int] = mapped_column(ForeignKey("cabinet.id"))
+    cabinets_id: Mapped[int] = mapped_column(ForeignKey("cabinets.id"))
     inv_number: Mapped[str]
     name: Mapped[str]
 

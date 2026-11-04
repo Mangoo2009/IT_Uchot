@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Изменить оборудование</title>
+</head>
+<body>
+  <h1>Изменить оборудование</h1>
+
+  <form action="/equipment/{{ equipment.id }}/edit" method="POST">
+    <input type="hidden" name="cabinets_id" value="{{ equipment.cabinets_id }}">
+    <input name="name" value="{{ equipment.name }}">
+    <input name="type" value="{{ equipment.type }}">
+    <input name="inv_number" value="{{ equipment.inv_number }}">
+    <input name="status" value="{{ equipment.status }}">
+    <button type="submit">Сохранить</button>
+  </form>
+
+  <form action="/equipment/{{ equipment.id }}/delete" method="POST">
+  <button type="submit">Удалить оборудование</button>
+  </form>
+
+  <a href="/cabinet/{{ equipment.cabinets_id }}">Назад</a>
+</body>
+</html>

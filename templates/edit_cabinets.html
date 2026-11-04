@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Редактировать кабинет</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Редактировать кабинет</h1>
+  <form action="/cabinet/{{ cabinet.id }}/edit" method="POST">
+    <input name="name" value="{{ cabinet.name }}" required><br>
+    <input name="id_user" type="number" value="{{ cabinet.id_user }}" required><br>
+    <button type="submit">Сохранить</button>
+  </form>
+  <form action="/cabinet/{{ cabinet.id }}/delete" method="POST">
+  <button type="submit">Удалить кабинет</button>
+  </form>
+  <a href="/cabinet/{{ cabinet.id }}">Назад</a>
+</body>
+</html>

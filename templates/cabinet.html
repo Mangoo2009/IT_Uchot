@@ -8,6 +8,7 @@
 <body>
   <h1>{{ cabinet.name }}</h1>
   <a href="/equipment/add?cabinet_id={{ cabinet.id }}">Добавить оборудование</a>
+  <a href="/cabinet/{{ cabinet.id }}/edit">Редактировать кабинет</a>
 
   <table border="1">
     <tr>
@@ -18,7 +19,7 @@
     </tr>
     {% for item in equipment %}
     <tr>
-      <td>{{ item.name }}</td>
+      <td><a href="/equipment/{{ item.id }}/edit">{{ item.name }}</a></td>
       <td>{{ item.type }}</td>
       <td>{{ item.inv_number }}</td>
       <td>{{ item.status }}</td>
