@@ -1,5 +1,3 @@
-import os
-
 from authx import AuthXConfig, AuthX, TokenPayload
 
 import uvicorn
@@ -27,12 +25,26 @@ Mango.JWT_TOKEN_LOCATION = ["cookies"]
 Mango.JWT_COOKIE_CSRF_PROTECT = False
 SuperMango = AuthX(config=Mango)
 
+#распределение по ролям
+async def get_current_user(payload: TokenPayload = Depends(SuperMango.access_token_required)):
+    with Session() as session:
+        user = session.get(Users, int(payload.sub))
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
+
+def require_roles(*roles: str):
+    async def role_checker(user: Users = Depends(get_current_user)) -> Users:
+        if user.role not in roles:
+            raise HTTPException(status_code=403, detail=f"Недостаточно прав")
+        return user
+    return role_checker
 
 #вход
 #страница входа
 @app.get('/login', tags=["login"])
 def login_page(request: Request):
-    return templates.TemplateResponse(request, 'Main_2.html', {})
+    return templates.TemplateResponse(request, 'Main_2.html')
 
 #добавление токена
 @app.post("/login", tags=["login"])
@@ -62,14 +74,14 @@ def main(request: Request, payload: TokenPayload = Depends(SuperMango.access_tok
 #кабинеты
 #страница добавление кабинетов
 @app.get('/cabinet/add', tags=["cabinets"])
-def add_cabinet_page(request: Request, payload: TokenPayload = Depends(SuperMango.access_token_required)):
+def add_cabinet_page(request: Request, user: Users = Depends(require_roles("admin"))):
     return templates.TemplateResponse(request, 'add_cabinet.html', {})
 
 #добавление кабинета
 @app.post('/cabinet', tags=["cabinets"])
 def add_cabinet_post(name: str = Form(...),
                      id_user: int = Form(...),
-                     payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                     user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         session.add(Cabinets(name=name, id_user=id_user))
         session.commit()
@@ -90,7 +102,7 @@ def cabinet_page(request: Request, cabinet_id: int,
 #страница редактирования
 @app.get('/cabinet/{cabinet_id}/edit', tags=['cabinets'])
 def edit_cabinet_page(request: Request, cabinet_id: int,
-                      payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                      user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         cabinet = session.get(Cabinets, cabinet_id)
         if cabinet is None:
@@ -100,7 +112,7 @@ def edit_cabinet_page(request: Request, cabinet_id: int,
 #редактирование кабинета
 @app.post('/cabinet/{cabinet_id}/edit', tags=['cabinets'])
 def edit_cabinet(request: Request, cabinet_id: int,
-                 payload: TokenPayload = Depends(SuperMango.access_token_required),
+                 user: Users = Depends(require_roles("admin")),
                  name: str = Form(),
                  id_user: int = Form()):
     with Session() as session:
@@ -115,7 +127,7 @@ def edit_cabinet(request: Request, cabinet_id: int,
 #удаление кабинета
 @app.post('/cabinet/{cabinet_id}/delete')
 def delete_cabinet(request: Request, cabinet_id: int,
-                   payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                   user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         cabinet = session.get(Cabinets, cabinet_id)
         if cabinet is None:
@@ -132,7 +144,7 @@ def delete_cabinet(request: Request, cabinet_id: int,
 #страница добавление
 @app.get('/equipment/add', tags=["equipment"])
 def equipment_add_page(request: Request, cabinet_id: int,
-                       payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                       user: Users = Depends(require_roles("admin"))):
     return templates.TemplateResponse(request, 'add_equipment.html', {'cabinet_id': cabinet_id})
 
 #добавление
@@ -142,7 +154,7 @@ def equipment_add_post(type: str = Form(...),
                        cabinets_id: int = Form(...),
                        inv_number: str = Form(...),
                        name: str = Form(...),
-                       payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                       user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         session.add(Equpment(
             type=type,
@@ -157,7 +169,7 @@ def equipment_add_post(type: str = Form(...),
 #страница изменения оборудования
 @app.get('/equipment/{equipment_id}/edit')
 def equipment_edit_page(request: Request, equipment_id: int,
-                   payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                   user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         equipment = session.get(Equpment, equipment_id)
         if equipment is None:
@@ -166,7 +178,7 @@ def equipment_edit_page(request: Request, equipment_id: int,
 
 @app.post('/equipment/{equipment_id}/edit')
 def equipment_edit(request: Request, equipment_id: int,
-                   payload: TokenPayload = Depends(SuperMango.access_token_required),
+                   user: Users = Depends(require_roles("admin")),
                    type: str = Form(...),
                    status: str = Form(...),
                    cabinets_id: int = Form(...),
@@ -188,7 +200,7 @@ def equipment_edit(request: Request, equipment_id: int,
 #удаление оборудования
 @app.post('/equipment/{equipment_id}/delete')
 def delete_equipment(request: Request, equipment_id: int,
-                     payload: TokenPayload = Depends(SuperMango.access_token_required)):
+                     user: Users = Depends(require_roles("admin"))):
     with Session() as session:
         equipment = session.get(Equpment, equipment_id)
         if equipment is None:
