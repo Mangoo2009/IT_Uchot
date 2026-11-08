@@ -8,7 +8,7 @@ from starlette import status
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from DataBase import Session, Users, Equpment, Cabinets
+from DataBase import Session, Users, Equpment, Cabinets, EquipmentHistory
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -24,6 +24,11 @@ Mango.JWT_SECRET_KEY = "mellstroy-burmalda-mama-ptica-123123123123"
 Mango.JWT_TOKEN_LOCATION = ["cookies"]
 Mango.JWT_COOKIE_CSRF_PROTECT = False
 SuperMango = AuthX(config=Mango)
+
+def history(cabinet_id: int, equipment_name: str, action: str, user_id: int, details: str | None):
+    with Session() as session:
+        session.add(EquipmentHistory(cabinet_id=cabinet_id, equipment_name=equipment_name, action=action, user_id=user_id, details=details))
+        session.commit()
 
 #распределение по ролям
 async def get_current_user(payload: TokenPayload = Depends(SuperMango.access_token_required)):
@@ -164,6 +169,7 @@ def equipment_add_post(type: str = Form(...),
             name=name
         ))
         session.commit()
+        history(cabinets_id, name, "Добавлено", user.id, None)
     return RedirectResponse(url=f'/cabinet/{cabinets_id}', status_code=303)
 
 #страница изменения оборудования
@@ -189,12 +195,33 @@ def equipment_edit(request: Request, equipment_id: int,
         equipment = session.get(Equpment, equipment_id)
         if equipment is None:
             raise HTTPException(status_code=404, detail='оборудование не найдено')
+
+        old_cabinet = equipment.cabinets_id
+        old_name = equipment.name
+        old_type = equipment.type
+        old_status = equipment.status
+        old_inv = equipment.inv_number
+
         equipment.name = name
         equipment.type = type
         equipment.status = status
         equipment.cabinets_id = cabinets_id
         equipment.inv_number = inv_number
+
         session.commit()
+
+        if old_cabinet != cabinets_id:
+            history(old_cabinet, old_name, "Перемещено", user.id, f"В кабинет {cabinets_id}")
+            history(cabinets_id, name, "Поступило", user.id, f"Из кабинета {old_cabinet}")
+        else:
+            changes = []
+            if old_name != name: changes.append(f"Название: {old_name} → {name}")
+            if old_type != type: changes.append(f"Тип: {old_type} → {type}")
+            if old_status != status: changes.append(f"Статус: {old_status} → {status}")
+            if old_inv != inv_number: changes.append(f"Инв. номер: {old_inv} → {inv_number}")
+            if changes:
+                history(cabinets_id, name, "Изменено", user.id, "; ".join(changes))
+
     return RedirectResponse(url=f'/cabinet/{cabinets_id}', status_code=303)
 
 #удаление оборудования
@@ -206,10 +233,23 @@ def delete_equipment(request: Request, equipment_id: int,
         if equipment is None:
             raise HTTPException(status_code=404, detail='оборудование не найдено')
         cabinets_id = equipment.cabinets_id
+        equip_name = equipment.name
+        history(cabinets_id, equip_name, "Удалено", user.id, None)
         session.delete(equipment)
         session.commit()
     return RedirectResponse(url=f'/cabinet/{cabinets_id}', status_code=303)
 
+#история
+@app.get('/cabinet/{cabinet_id}/history')
+def history_cab(request: Request, cabinet_id: int, payload: TokenPayload = Depends(SuperMango.access_token_required)):
+    with Session() as session:
+        cabinet = session.get(Cabinets, cabinet_id)
+        if cabinet is None:
+            raise HTTPException(status_code=404, detail='кабинет ненайден')
+        history_mam = session.query(EquipmentHistory).filter(EquipmentHistory.cabinet_id == cabinet_id).order_by(EquipmentHistory.created_at.desc()).all()
+        return templates.TemplateResponse(request, 'History.html', {'cabinet': cabinet, 'history': history_mam})
+
+#выход из системыф
 @app.post('/logout')
 def logout():
     response = RedirectResponse(url='/login', status_code=303)

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>История оборудования</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>История оборудования: {{ cabinet.name }}</h1>
+  <a href="/cabinet/{{ cabinet.id }}">← Назад к кабинету</a>
+
+  <table border="1">
+    <tr>
+      <th>Дата и время</th>
+      <th>Оборудование</th>
+      <th>Действие</th>
+      <th>Подробности</th>
+      <th>Кто</th>
+    </tr>
+    {% for h in history %}
+    <tr>
+      <td>{{ h.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ h.equipment_name }}</td>
+      <td>{{ h.action }}</td>
+      <td>{{ h.details or '' }}</td>
+      <td>{{ h.user.name }} {{ h.user.surname }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
