@@ -22,7 +22,6 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 Mango = AuthXConfig()
 Mango.JWT_SECRET_KEY = "mellstroy-burmalda-mama-ptica-123123123123"
 Mango.JWT_TOKEN_LOCATION = ["cookies"]
-Mango.JWT_COOKIE_CSRF_PROTECT = False
 SuperMango = AuthX(config=Mango)
 
 def history(cabinet_id: int, equipment_name: str, action: str, user_id: int, details: str | None):
